@@ -69,7 +69,7 @@ function launch(manager::Union{PBSManager, SGEManager, QRSHManager},
 
             cmd = `cd $dir && $exename $exeflags $worker_arg`
             qsub_cmd = pipeline(`echo $(Base.shell_escape(cmd))` , (isPBS ?
-                    `qsub -N $jobname -j oe -k o -t 1-$np $queue $qsub_env $res_list` :
+                    `qsub -N $jobname -j oe -r y -k o -J 1-$np $queue $qsub_env $res_list` :
                     `qsub -N $jobname -terse -j y -R y -t 1-$np -V $res_list $queue $qsub_env`))
             out,qsub_proc = open(qsub_cmd)
             if !success(qsub_proc)
@@ -81,7 +81,7 @@ function launch(manager::Union{PBSManager, SGEManager, QRSHManager},
                 id = id[1:end-2]
             end
 
-            filename(i) = isPBS ? "$home/julia-$(getpid()).o$id-$i" : "$home/julia-$(getpid()).o$id.$i"
+            filename(i) = isPBS ? "$home/julia-$(getpid()).o$id.$i" : "$home/julia-$(getpid()).o$id.$i"
             print("job id is $id, waiting for job to start ")
             for i=1:np
                 # wait for each output stream file to get created
